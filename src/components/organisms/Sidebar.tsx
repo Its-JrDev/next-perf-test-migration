@@ -22,7 +22,13 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/favorites', label: 'Favoritos', icon: Heart, authOnly: true },
 ];
 
-export function Sidebar({ onClose }: { onClose?: () => void }) {
+export function Sidebar({
+  onClose,
+  position = 'left',
+}: {
+  onClose?: () => void;
+  position?: 'left' | 'right';
+}) {
   const { user, isAuthenticated } = useAuth();
   const pathname = usePathname() ?? '/';
 
@@ -36,7 +42,12 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     to === '/' ? pathname === to : pathname.startsWith(to);
 
   return (
-    <aside className="bg-sidebar flex h-full w-64 flex-col border-r">
+    <aside
+      className={cn(
+        'bg-sidebar flex h-full w-64 flex-col',
+        position === 'right' ? 'border-l' : 'border-r',
+      )}
+    >
       <div className="flex h-16 items-center gap-2 px-5">
         <CalendarRange className="text-primary size-6" />
         <span className="text-lg font-bold">Gestión</span>

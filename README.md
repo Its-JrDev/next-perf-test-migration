@@ -111,6 +111,21 @@ shadcn/ui no es una biblioteca tradicional que se instala vía npm como dependen
 - **Guards declarativos**: `AuthGuard`, `GuestGuard` y `RoleGuard` se mantienen como wrappers client dentro de cada página, usando `next/navigation` para redirección.
 - **Navegación**: `next/link` y `useRouter`, con code-splitting y optimización por ruta (SSG/SSR automático).
 
+### ¿Sidebar a la izquierda o a la derecha por vista?
+
+El layout `(shell)` usa un único `AppShell` que decide el lado del sidebar según la ruta activa, sin duplicar layouts ni carpetas:
+
+- **`src/components/templates/AppShell.tsx`** deriva el lado con `usePathname()`:
+  ```ts
+  const side: 'left' | 'right' =
+    pathname === '/' || pathname.startsWith('/events') ? 'left' : 'right';
+  ```
+  Cualquier ruta no incluida cae en `right` (hoy: `/categories*` y `/favorites`).
+- **`src/components/organisms/Sidebar.tsx`** recibe `position?: 'left' | 'right'` (por defecto `'left'`) y conmuta su borde interno (`border-r` ↔ `border-l`).
+- En desktop, `AppShell` reposiciona el sidebar dentro del flex con `order-last`/`order-first` (sin tocar el sticky y el colapso de ancho). En móvil, el drawer se desliza desde `left-0`/`-translate-x-full` o `right-0`/`translate-x-full`.
+
+**Para cambiar el reparto** solo se edita el `ternary` de `side` en `AppShell.tsx` (decisión por prefijo de ruta). Como las páginas son estáticas, el HTML prerenderizado ya trae el lado correcto, evitando flash de hidratación.
+
 ### ¿Por qué Tailwind CSS 4?
 
 - **Rendimiento**: Compila solo las clases que usas, generando CSS mínimo.

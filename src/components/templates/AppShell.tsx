@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { AppHeader, Sidebar } from '@/components/organisms';
 import { cn } from '@/utils/cn';
 
@@ -9,6 +10,10 @@ interface AppShellProps {
 export function AppShell({ children }: AppShellProps) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
+
+  const pathname = usePathname() ?? '/';
+  const side: 'left' | 'right' =
+    pathname === '/' || pathname.startsWith('/events') ? 'left' : 'right';
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -30,9 +35,10 @@ export function AppShell({ children }: AppShellProps) {
         className={cn(
           'sticky top-0 hidden h-screen shrink-0 overflow-hidden transition-[width] duration-300 ease-in-out md:block',
           collapsed ? 'w-0' : 'w-64',
+          side === 'right' && 'order-last',
         )}
       >
-        <Sidebar />
+        <Sidebar position={side} />
       </div>
 
       <div
@@ -51,15 +57,25 @@ export function AppShell({ children }: AppShellProps) {
         />
         <div
           className={cn(
-            'absolute inset-y-0 left-0 transition-transform duration-300 ease-in-out',
-            mobileOpen ? 'translate-x-0' : '-translate-x-full',
+            'absolute inset-y-0 transition-transform duration-300 ease-in-out',
+            side === 'right' ? 'right-0' : 'left-0',
+            mobileOpen
+              ? 'translate-x-0'
+              : side === 'right'
+                ? 'translate-x-full'
+                : '-translate-x-full',
           )}
         >
-          <Sidebar onClose={() => setMobileOpen(false)} />
+          <Sidebar position={side} onClose={() => setMobileOpen(false)} />
         </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div
+        className={cn(
+          'flex min-w-0 flex-1 flex-col',
+          side === 'right' && 'order-first',
+        )}
+      >
         <AppHeader
           onMenuToggle={() => setMobileOpen(true)}
           onCollapseToggle={() => setCollapsed((v) => !v)}
