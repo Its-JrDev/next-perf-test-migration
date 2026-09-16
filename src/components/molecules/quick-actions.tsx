@@ -1,3 +1,4 @@
+'use client';
 import { CalendarPlus, FolderPlus, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks';
 import { Button, Separator } from '@/components/atoms';

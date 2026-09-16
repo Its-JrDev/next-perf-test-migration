@@ -1,3 +1,4 @@
+'use client';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Badge, Button, EventImage, Skeleton } from '@/components/atoms';

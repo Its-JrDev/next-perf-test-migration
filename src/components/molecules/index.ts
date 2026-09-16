@@ -1,5 +1,3 @@
-'use client';
-
 export { Alert, AlertTitle, AlertDescription } from './alert';
 export { Avatar, AvatarImage, AvatarFallback } from './avatar';
 export {

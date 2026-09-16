@@ -1,5 +1,3 @@
-'use client';
-
 export { AppShell } from './AppShell';
 export { AuthFormTemplate } from './AuthFormTemplate';
 export { CategoriesTemplate } from './CategoriesTemplate';

@@ -1,5 +1,3 @@
-'use client';
-
 export { AppHeader } from './AppHeader';
 export { CategoryForm } from './CategoryForm';
 export { CategoryFormDialog } from './CategoryFormDialog';

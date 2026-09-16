@@ -1,5 +1,3 @@
-'use client';
-
 export { Badge } from './badge';
 export { Button, buttonVariants } from './button';
 export { EventImage } from './EventImage';

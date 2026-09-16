@@ -4,6 +4,7 @@ import { PanelLeft, PanelLeftClose } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/hooks';
 import { Button, Separator } from '@/components/atoms';
+import { cn } from '@/utils/cn';
 import {
   CommandMenu,
   ProfileMenu,
@@ -15,12 +16,14 @@ interface AppHeaderProps {
   onMenuToggle: () => void;
   onCollapseToggle: () => void;
   sidebarCollapsed: boolean;
+  sidebarSide: 'left' | 'right';
 }
 
 export function AppHeader({
   onMenuToggle,
   onCollapseToggle,
   sidebarCollapsed,
+  sidebarSide,
 }: AppHeaderProps) {
   const { isAuthenticated } = useAuth();
 
@@ -30,7 +33,10 @@ export function AppHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
+          className={cn(
+            'md:hidden',
+            sidebarSide === 'right' && 'order-last',
+          )}
           onClick={onMenuToggle}
           aria-label="Abrir menú"
         >
@@ -40,7 +46,10 @@ export function AppHeader({
         <Button
           variant="ghost"
           size="icon"
-          className="hidden md:inline-flex"
+          className={cn(
+            'hidden md:inline-flex',
+            sidebarSide === 'right' && 'order-last',
+          )}
           onClick={onCollapseToggle}
           aria-label={
             sidebarCollapsed ? 'Mostrar barra lateral' : 'Ocultar barra lateral'

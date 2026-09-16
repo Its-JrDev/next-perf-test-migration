@@ -1,3 +1,4 @@
+'use client';
 import { Plus, type LucideIcon } from 'lucide-react';
 import { Button, Skeleton } from '@/components/atoms';
 import { Alert, AlertDescription, AlertTitle } from '@/components/molecules';

@@ -1,3 +1,4 @@
+'use client';
 import { type ReactNode, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { AppHeader, Sidebar } from '@/components/organisms';
@@ -80,6 +81,7 @@ export function AppShell({ children }: AppShellProps) {
           onMenuToggle={() => setMobileOpen(true)}
           onCollapseToggle={() => setCollapsed((v) => !v)}
           sidebarCollapsed={collapsed}
+          sidebarSide={side}
         />
         <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 lg:px-6">
           {children}

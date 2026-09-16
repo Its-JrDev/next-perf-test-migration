@@ -25,7 +25,6 @@ Construir una interfaz web utilizando React, TypeScript y Next.js que consuma la
 | Iconos | Lucide React |
 | Notificaciones | Sonner |
 | Formularios | Zod (validación) |
-| Tablas | Tanstack Table |
 | Testing | Vitest + Testing Library |
 | Calidad de código | ESLint + Prettier |
 
@@ -111,6 +110,28 @@ shadcn/ui no es una biblioteca tradicional que se instala vía npm como dependen
 - **Guards declarativos**: `AuthGuard`, `GuestGuard` y `RoleGuard` se mantienen como wrappers client dentro de cada página, usando `next/navigation` para redirección.
 - **Navegación**: `next/link` y `useRouter`, con code-splitting y optimización por ruta (SSG/SSR automático).
 
+### Server vs Client Components
+
+La aplicación usa **React Server Components (RSC)** con una frontera de cliente delimitada por componente (no por barrel). La directiva `'use client'` vive **dentro de cada archivo** que la necesita, mientras los `index.ts` de cada capa (`atoms`, `molecules`, `organisms`, `templates`) son módulos de servidor que re-exportan sin forzar el bundle cliente.
+
+**Renderizados en servidor (SSR):**
+- `templates`: `HomeTemplate`, `ForbiddenTemplate`, `NotFoundTemplate`
+- `organisms`: `EventCard` (compone hijos client sin estado propio)
+- `molecules`/`atoms` puramente presentacionales: `Alert`, `Card`, `Skeleton`, `Badge`, `Input`, `Textarea`
+- `screens`: `Home`, `Forbidden` (sin hooks ni eventos)
+- Páginas y layouts de `src/app`
+
+**Renderizados en cliente (CSR) — con `'use client'` explícito:**
+- Proveedores de contexto (`AppProvider`, `AuthProvider`, `FavoritesProvider`, `ErrorBoundary`) y `root-providers`
+- Interfaz interactiva: `AppShell`, `AppHeader`, `Sidebar`, `CommandMenu`, `ProfileMenu`, `ThemeToggle`, `QuickActions`, `FavoriteButton`, `PaginationWithSize`
+- Formularios y modales: `Login`, `Register`, `EventForm`, `CategoryForm`, `EventFormDialog`, `CategoryFormDialog`, `FormModalHost`
+- Screens con estado/efectos: `Events`, `EventDetail`, `Categories`, `CategoryDetail`, `Favorites`
+- Primitivas de UI interactivas (Radix/cmdk/sonner): `Button`, `Select`, `Dialog`, `DropdownMenu`, `Popover`, `Tabs`, `Avatar`, `Separator`, `Label`, `EventImage`, `Toaster`, `Command`
+- Guards: `AuthGuard`, `RoleGuard`, `GuestGuard`
+- Capa HTTP cliente: `services/*` (axios con `localStorage`) y `hooks/*`
+
+El criterio es: **un componente es Server Component salvo que use hooks/estado, eventos, APIs del navegador o librerías cliente**. Esto reduce el JavaScript enviado al navegador en las vistas estáticas.
+
 ### ¿Sidebar a la izquierda o a la derecha por vista?
 
 El layout `(shell)` usa un único `AppShell` que decide el lado del sidebar según la ruta activa, sin duplicar layouts ni carpetas:
@@ -123,6 +144,7 @@ El layout `(shell)` usa un único `AppShell` que decide el lado del sidebar seg�
   Cualquier ruta no incluida cae en `right` (hoy: `/categories*` y `/favorites`).
 - **`src/components/organisms/Sidebar.tsx`** recibe `position?: 'left' | 'right'` (por defecto `'left'`) y conmuta su borde interno (`border-r` ↔ `border-l`).
 - En desktop, `AppShell` reposiciona el sidebar dentro del flex con `order-last`/`order-first` (sin tocar el sticky y el colapso de ancho). En móvil, el drawer se desliza desde `left-0`/`-translate-x-full` o `right-0`/`translate-x-full`.
+- **`src/components/organisms/AppHeader.tsx`** recibe `sidebarSide` y coloca el botón de toggle en el mismo lado que el sidebar: cuando `sidebarSide === 'right'`, los botones de menú (móvil) y de colapso (desktop) se mueven con `order-last` a la extrema derecha del header, justo después del menú de perfil / botones de registro-iniciar sesión. Así el botón siempre acompaña al sidebar y no queda fijo a la izquierda.
 
 **Para cambiar el reparto** solo se edita el `ternary` de `side` en `AppShell.tsx` (decisión por prefijo de ruta). Como las páginas son estáticas, el HTML prerenderizado ya trae el lado correcto, evitando flash de hidratación.
 
@@ -136,6 +158,13 @@ El layout `(shell)` usa un único `AppShell` que decide el lado del sidebar seg�
 ### ¿Por qué React Context + Hooks en lugar de Redux/Zustand?
 
 Para una app de este alcance, Context es suficiente y evita dependencias adicionales. Los proveedores están separados por dominio (`AuthProvider`, `FavoritesProvider`) para minimizar re-renders.
+
+### Código muerto / dependencias sin usar
+
+Durante la migración se eliminaron duplicados y dependencias que no se importaban en `src/`:
+
+- **Eliminados**: `organisms/ProductForm.tsx`, `organisms/ProductFormDialog.tsx`, `hooks/useProductList.ts`, `hooks/useLocalStorage.ts` (duplicados de `EventForm`/`useEventList` sin uso).
+- **Sin usar en el código** (candidatas a remover de `package.json`): `recharts`, `@dnd-kit/*`, `vaul`, `@base-ui/react`, `@tanstack/react-table`, varios `@radix-ui/*` de toggle/tooltip/checkbox, y fuentes `@fontsource-variable/*` adicionales.
 
 ## Scripts Disponibles
 

@@ -1,3 +1,4 @@
+'use client';
 import { ChevronsLeft, ChevronsRight } from 'lucide-react';
 
 import { cn } from '@/utils/cn';

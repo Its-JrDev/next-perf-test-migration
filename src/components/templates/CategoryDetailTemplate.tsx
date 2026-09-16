@@ -1,3 +1,4 @@
+'use client';
 import { ArrowLeft, CalendarRange, Pencil, Plus, Trash2 } from 'lucide-react';
 import { Button, Skeleton } from '@/components/atoms';
 import { EventCard } from '@/components/organisms';

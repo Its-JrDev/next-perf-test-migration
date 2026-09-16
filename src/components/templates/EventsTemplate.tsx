@@ -1,3 +1,4 @@
+'use client';
 import { CalendarRange, Plus, Search } from 'lucide-react';
 import { Button, Input, Skeleton } from '@/components/atoms';
 import { EventCard, PaginationWithSize } from '@/components/organisms';
