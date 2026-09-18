@@ -1,4 +1,4 @@
-import api from '@/services/axios.client';
+import api from '@/services/api.client';
 import type { User } from '@/types';
 
 export interface ChangePasswordPayload {

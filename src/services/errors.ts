@@ -119,7 +119,11 @@ export class ApiError extends Error {
 }
 
 export function isApiError(error: unknown): error is ApiError {
-  return error instanceof ApiError;
+  if (error instanceof ApiError) return true;
+  if (error instanceof Error && (error as Error & { status?: number }).status !== undefined) {
+    return true;
+  }
+  return false;
 }
 
 export function getErrorMessage(error: unknown): string {
@@ -128,35 +132,46 @@ export function getErrorMessage(error: unknown): string {
   return 'Ocurrió un error inesperado';
 }
 
-/**
- * Normaliza un error de Axios (o cualquiera) a un ApiError con su categoría
- * (red, validación, autenticación, etc.) para manejar excepciones de forma
- * estructurada con try/catch/finally.
- */
 export function toApiError(error: unknown): ApiError {
   if (error instanceof ApiError) return error;
 
-  if (
-    error &&
-    typeof error === 'object' &&
-    'isAxiosError' in error &&
-    (error as { isAxiosError: boolean }).isAxiosError
-  ) {
-    const status = (error as { response?: { status?: number } }).response
-      ?.status;
-    if (status === undefined) {
+  if (error instanceof Error) {
+    const status = (error as Error & { status?: number }).status;
+    const kind = status ? KIND_BY_STATUS[status] : undefined;
+
+    if (kind === 'auth' || kind === 'network') {
       return new ApiError({
-        kind: 'network',
-        message:
-          'No se pudo conectar con el servidor. Verifica tu conexión e inténtalo de nuevo.',
+        status,
+        kind,
+        message: error.message,
         cause: error,
       });
     }
-    return new ApiError({ status, cause: error });
-  }
 
-  if (error instanceof Error) {
-    return new ApiError({ message: error.message, cause: error });
+    if (kind === 'validation') {
+      const responseData =
+        (error as Error & { response?: { data?: unknown } }).response
+          ?.data;
+      const details =
+        responseData && typeof responseData === 'object'
+          ? detailsFromPayload(responseData)
+          : undefined;
+
+      return new ApiError({
+        status,
+        kind,
+        message: error.message,
+        details,
+        cause: error,
+      });
+    }
+
+    return new ApiError({
+      status,
+      kind,
+      message: error.message,
+      cause: error,
+    });
   }
 
   return new ApiError({ message: 'Ocurrió un error inesperado', cause: error });

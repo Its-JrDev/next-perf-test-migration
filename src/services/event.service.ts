@@ -1,4 +1,4 @@
-import api from '@/services/axios.client';
+import api from '@/services/api.client';
 import type {
   Event,
   CreateEventPayload,
@@ -11,7 +11,7 @@ export const eventService = {
     query: EventQueryParams = {},
   ): Promise<Event[]> {
     const { data } = await api.get<Event[]>('/events', {
-      params: query,
+      params: query as Record<string, unknown>,
     });
     return data;
   },
@@ -22,7 +22,7 @@ export const eventService = {
   },
 
   async createEvent(payload: CreateEventPayload): Promise<Event> {
-    // Axios adds the JWT in axios.client; 401/403 and validation errors are
+    // 401/403 and validation errors are
     // intentionally allowed to reach the form for user-facing feedback.
     const { data } = await api.post<Event>('/events', payload);
     return data;

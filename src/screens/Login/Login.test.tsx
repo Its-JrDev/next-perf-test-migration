@@ -3,21 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { afterEach, describe, it, expect, vi } from 'vitest';
 import { useRouter } from 'next/navigation';
 import { AuthProvider } from '@/providers';
-import { ApiError, authService } from '@/services';
+import { authService } from '@/services/auth.service';
 import { LoginPage } from './Login';
 
-vi.mock('@/services', async (importOriginal) => {
-  const original = await importOriginal<typeof import('@/services')>();
-  return {
-    ...original,
-    authService: {
-      ...original.authService,
-      login: vi.fn(),
-    },
-  };
-});
-
-const mockedLogin = vi.mocked(authService.login);
+const mockedLogin = vi.spyOn(authService, 'login');
 
 function renderLogin() {
   return render(
@@ -59,7 +48,7 @@ describe('LoginPage', () => {
 
   it('muestra el error del servidor cuando el login falla', async () => {
     mockedLogin.mockRejectedValue(
-      new ApiError({ message: 'Credenciales inválidas', status: 401 }),
+      Object.assign(new Error('Credenciales inválidas'), { status: 401 }),
     );
     const user = userEvent.setup();
     renderLogin();
